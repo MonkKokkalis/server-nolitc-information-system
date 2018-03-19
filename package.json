@@ -1,0 +1,23 @@
+{
+  "name": "server-nolitc-information-system",
+  "version": "1.0.0",
+  "description": "Web server for the NOLITC Information System",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "Node",
+    "JS",
+    "Express",
+    "JS",
+    "MongoDB"
+  ],
+  "author": "Monk Kokkalis",
+  "license": "MIT",
+  "dependencies": {
+    "body-parser": "^1.18.2",
+    "express": "^4.16.3",
+    "morgan": "^1.9.0"
+  }
+}
