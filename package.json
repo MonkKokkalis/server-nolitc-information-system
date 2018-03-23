@@ -16,8 +16,10 @@
   "author": "Monk Kokkalis",
   "license": "MIT",
   "dependencies": {
+    "async": "^2.6.0",
     "body-parser": "^1.18.2",
     "express": "^4.16.3",
+    "mime": "^2.2.0",
     "morgan": "^1.9.0"
   }
 }
