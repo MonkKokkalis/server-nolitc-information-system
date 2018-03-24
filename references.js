@@ -18,6 +18,9 @@ const functions = {
                 }))    
                 return new Promise((resolve, reject) => {
                    async.map(files, fs.stat, function (error, result) {
+                       if(error) {
+                           reject(error);
+                       }
                         resolve(construct({
                                 files: files,
                                 stats: result
@@ -55,20 +58,7 @@ const construct = (params) => {
 }
 
 const parseSize = (size) => {
-    // const length = size.toString().length;
-    // let filesize = size.toString();
-    // if(filesize.length > 3) {
-    //     filesize = filesize.substr(0, 3);
-    // }
-    // if(length < 3) {
-    //     return filesize.concat(' Bytes');
-    // } else if(length >= 3 && length <=6 ) {
-    //     return filesize.concat(' Kilobytes');
-    // } else if(length >= 7 && length <= 9) {
-    //     return filesize.concat(' Megabytes');
-    // }
-    let filesize = Math.round(size / 1000);
-   
+    const filesize = Math.round(size / 1000);
     if(Math.round(filesize) < 1) {
         return '1 Kilobyte';
     } else if(filesize < 1000) {
@@ -78,6 +68,16 @@ const parseSize = (size) => {
     } else if (filesize > 1000000 && filesize <= 1000000000) {
         return (filesize/ 1000000).toPrecision(3).concat(' Gigabytes');
     }
-    // return filesize;   
 }
 module.exports = functions;
+
+// async.waterfall([
+//     function (callback) {
+//         setTimeout(() => { callback(null, 'from first function') }, 2000);
+//     },
+//     function (arg1, callback) {
+//         setTimeout(() => { callback(null, arg1) }, 2000);
+//     }
+// ], function (error, result) {
+//     console.log(result);
+// })

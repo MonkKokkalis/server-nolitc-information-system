@@ -1,0 +1,6 @@
+::1 - - [23/Mar/2018:07:30:26 +0000] "GET /api/files/registrar HTTP/1.1" 200 1034
+::1 - - [23/Mar/2018:07:32:11 +0000] "GET /api/files/registrar HTTP/1.1" 304 -
+::1 - - [23/Mar/2018:07:32:26 +0000] "GET /api/files/registrar HTTP/1.1" 200 1034
+::1 - - [23/Mar/2018:07:33:00 +0000] "GET /api/files/registrar HTTP/1.1" 200 1034
+::ffff:20.0.0.59 - - [24/Mar/2018:09:05:03 +0000] "GET / HTTP/1.0" 404 139
+::1 - - [24/Mar/2018:14:01:53 +0000] "GET /api/files/registrar HTTP/1.1" 200 697
