@@ -11,7 +11,7 @@ const getFiles = (url) => {
     return new Promise((resolve, reject) => {
         async.waterfall([
             function(callback) {
-                readDir(url).then(result => callback(null, result)).catch(error => reject(error));
+                readdir(url).then(result => callback(null, result)).catch(error => reject(error));
             },
             function(resultArray, callback) {
                 filter({url: url, array: resultArray}).then(result => callback(null, result));
@@ -53,7 +53,7 @@ const filter = (param) => {
     });
 }
 
-const readDir = (url) => {
+const readdir = (url) => {
     return new Promise((resolve, reject) => {
         fs.readdir(url, (error, resultArray) => {
             if(error) {
