@@ -18,10 +18,23 @@ const getFiles = (url) => {
             },
             function(filteredArray, callback) {
                 map({url: url, array: filteredArray}).then(result => callback(null, result));
+            },
+            function(mappedArray, callback) {
+                group(mappedArray).then(result => callback(null, result));
             }
         ], (error, result) => {
             resolve({url: url, files: result});
         });
+    })
+}
+
+const group = (mappedArray) => {
+    return new Promise((resolve) => {
+        async.times(Math.trunc(mappedArray.length / 5) + 1, function (index, next) {
+            next(null, mappedArray.slice(index * 5, (index + 1) * 5))
+        }, function (error, result) {
+           resolve(result);
+        })
     })
 }
 
