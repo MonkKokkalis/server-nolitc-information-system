@@ -7,23 +7,23 @@ mime.define({
     'application/microsoft-excel-file': ['xlsx']
 }, true);
 
-const getAllFiles = (url) => {
+const searchFile = (url, filename) => {
     return new Promise((resolve, reject) => {
         async.waterfall([
-            function (callback) {
+            function(callback) {
                 readdir(url).then(result => callback(null, result))
                     .catch(error => reject(error));
             },
             function (resultArray, callback) {
                 filter({ url: url, array: resultArray }).then(result => callback(null, result));
             },
-            function (filteredArray, callback) {
-                reduce({ url: url, array: filteredArray }).then(result => callback(null, result));
+            function(filteredArray, callback) {
+                reduce({url: url, array: filteredArray}).then(result => callback(null, result));
             },
-            function (reducedArray, callback) {
+            function(reducedArray, callback) {
                 stat(reducedArray).then(result => callback(null, result));
             },
-            function (statArray, callback) {
+            function(statArray, callback) {
                 group(statArray).then(result => callback(null, result));
             }
         ], (error, result) => resolve(result));
@@ -42,9 +42,9 @@ const group = (mappedArray) => {
 
 const stat = (array) => {
     return new Promise((resolve) => {
-        async.map(array, function (element, callback) {
+        async.map(array, function(element, callback){ 
             fs.stat(element, (error, stats) => {
-                callback(null, construct({ file: element, metadata: stats }));
+                callback(null, construct({file: element, metadata: stats}));
             })
         }, (error, result) => {
             resolve(result);
@@ -104,11 +104,11 @@ const filter = (param) => {
 }
 
 const reduce = (param) => {
-    return new Promise((resolve) => {
-        async.reduce(param.array, [], function (accumulator, current, callback) {
+    return new Promise((resolve, reject) => {
+        async.reduce(param.array, [], function(accumulator, current, callback) {
             readdir(path.join(param.url, current))
-                .then(resultArray =>
-                    map({ url: path.join(param.url, current), array: resultArray }))
+                .then(resultArray => 
+                    map({url: path.join(param.url, current), array: resultArray}))
                 .then(result => callback(null, [...accumulator, ...result]))
         }, (error, result) => {
             resolve(result);
@@ -118,7 +118,7 @@ const reduce = (param) => {
 
 const map = (param) => {
     return new Promise((resolve) => {
-        async.map(param.array, function (element, callback) {
+        async.map(param.array, function(element, callback) {
             callback(null, path.join(param.url, element));
         }, (error, result) => {
             resolve(result);
@@ -126,5 +126,4 @@ const map = (param) => {
     })
 }
 
-
-module.exports = getAllFiles;
+module.exports = searchFile;

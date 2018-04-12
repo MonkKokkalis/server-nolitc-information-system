@@ -5,79 +5,95 @@ const mime = require('mime/lite');
 mime.define({
     'application/micrsoft-word-file': ['docx'],
     'application/microsoft-excel-file': ['xlsx']
-}, true)
-const functions = {
-    getFiles: function(url) {
-        return new Promise((resolve, reject) => {
-            resolve(readDir(url).then(result => {
-                let files = result.filter(element => {
-                    return path.extname(element).length > 1;
-                })
-                .map((element => {
-                    return url.concat('/', element);
-                }))    
-                return new Promise((resolve, reject) => {
-                   async.map(files, fs.stat, function (error, result) {
-                       if(error) {
-                           reject(error);
-                       }
-                        resolve(construct({
-                                files: files,
-                                stats: result
-                            })
-                        )
-                   })
-                })
-            }))
-        })
-    }
+}, true);
+
+const getFiles = (url) => {
+    return new Promise((resolve, reject) => {
+        async.waterfall([
+            function (callback) {
+                readdir(url).then(result => callback(null, result)).catch(error => reject(error));
+            },
+            function (resultArray, callback) {
+                filter({ url: url, array: resultArray }).then(result => callback(null, result));
+            },
+            function (filteredArray, callback) {
+                map({ url: url, array: filteredArray }).then(result => callback(null, result));
+            },
+            function (mappedArray, callback) {
+                group(mappedArray).then(result => callback(null, result));
+            }
+        ], (error, result) => {
+            resolve({ url: url, files: result });
+        });
+    })
 }
 
-const readDir = (url) => {
+const group = (mappedArray) => {
+    return new Promise((resolve) => {
+        async.times(Math.trunc(mappedArray.length / 5) + 1, function (index, next) {
+            next(null, mappedArray.slice(index * 5, (index + 1) * 5))
+        }, function (error, result) {
+            resolve(result);
+        })
+    })
+}
+
+const map = (param) => {
+    return new Promise((resolve) => {
+        async.map(param.array, function (element, callback) {
+            fs.stat(path.join(param.url, element), (error, stats) => {
+                callback(null, construct({ file: element, metadata: stats }));
+            })
+        }, (error, result) => {
+            resolve(result);
+        })
+    })
+}
+
+const filter = (param) => {
+    return new Promise((resolve, reject) => {
+        async.filter(param.array, function (filePath, callback) {
+            fs.stat(path.join(param.url, filePath), (error, stats) => {
+                const dir = !stats.isDirectory();
+                callback(null, dir);
+            })
+        }, (error, results) => {
+            if (error) {
+                reject(error);
+            }
+            resolve(results);
+        });
+    });
+}
+
+const readdir = (url) => {
     return new Promise((resolve, reject) => {
         fs.readdir(url, (error, resultArray) => {
-            if(error) {
-                reject(error)
+            if (error) {
+                reject(error);
             }
             resolve(resultArray);
         })
     })
 }
 
-const construct = (params) => {
-    const result = [];
-    for(let i = 0; i < params.files.length; i++) {
-        result.push ({
-            filename: path.basename(params.files[i]),
-            size: parseSize(params.stats[i].size),
-            filetype: mime.getType(params.files[i]),
-            url: params.files[i]
-        })
+const construct = (param) => {
+    return {
+        filename: path.basename(param.file),
+        size: parseSize(param.metadata.size),
+        filetype: mime.getType(param.file),
     }
-    return result;
 }
 
 const parseSize = (size) => {
     const filesize = Math.round(size / 1000);
-    if(Math.round(filesize) < 1) {
+    if (Math.round(filesize) < 1) {
         return '1 Kilobyte';
-    } else if(filesize < 1000) {
+    } else if (filesize < 1000) {
         return filesize.toString().concat(' Kilobytes')
-    } else if(filesize >= 1000 && filesize <= 1000000 ) {
+    } else if (filesize >= 1000 && filesize <= 1000000) {
         return Math.round(filesize / 1000).toString().concat(' Megabytes');
     } else if (filesize > 1000000 && filesize <= 1000000000) {
-        return (filesize/ 1000000).toPrecision(3).concat(' Gigabytes');
+        return (filesize / 1000000).toPrecision(3).concat(' Gigabytes');
     }
 }
-module.exports = functions;
-
-// async.waterfall([
-//     function (callback) {
-//         setTimeout(() => { callback(null, 'from first function') }, 2000);
-//     },
-//     function (arg1, callback) {
-//         setTimeout(() => { callback(null, arg1) }, 2000);
-//     }
-// ], function (error, result) {
-//     console.log(result);
-// })
