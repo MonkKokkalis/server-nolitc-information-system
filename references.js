@@ -1,99 +1,28 @@
-const fs = require('fs');
-const path = require('path');
-const async = require('async');
-const mime = require('mime/lite');
-mime.define({
-    'application/micrsoft-word-file': ['docx'],
-    'application/microsoft-excel-file': ['xlsx']
-}, true);
-
-const getFiles = (url) => {
-    return new Promise((resolve, reject) => {
-        async.waterfall([
-            function (callback) {
-                readdir(url).then(result => callback(null, result)).catch(error => reject(error));
-            },
-            function (resultArray, callback) {
-                filter({ url: url, array: resultArray }).then(result => callback(null, result));
-            },
-            function (filteredArray, callback) {
-                map({ url: url, array: filteredArray }).then(result => callback(null, result));
-            },
-            function (mappedArray, callback) {
-                group(mappedArray).then(result => callback(null, result));
-            }
-        ], (error, result) => {
-            resolve({ url: url, files: result });
-        });
-    })
-}
-
-const group = (mappedArray) => {
-    return new Promise((resolve) => {
-        async.times(Math.trunc(mappedArray.length / 5) + 1, function (index, next) {
-            next(null, mappedArray.slice(index * 5, (index + 1) * 5))
-        }, function (error, result) {
-            resolve(result);
-        })
-    })
-}
-
-const map = (param) => {
-    return new Promise((resolve) => {
-        async.map(param.array, function (element, callback) {
-            fs.stat(path.join(param.url, element), (error, stats) => {
-                callback(null, construct({ file: element, metadata: stats }));
+router.post('/signup', (req, res) => {
+    bcryptjs.hash(req.body.password, 10, (error, hash) => {
+        if (error) {
+            console.log(error);
+            return res.status(500).json({
+                error: error
+            });
+        } else {
+            const user = new User({
+                _id: new mongoose.Types.ObjectId(),
+                username: req.body.username,
+                password: hash,
+                type: req.body.type
             })
-        }, (error, result) => {
-            resolve(result);
-        })
-    })
-}
-
-const filter = (param) => {
-    return new Promise((resolve, reject) => {
-        async.filter(param.array, function (filePath, callback) {
-            fs.stat(path.join(param.url, filePath), (error, stats) => {
-                const dir = !stats.isDirectory();
-                callback(null, dir);
+            user.save().then(result => {
+                console.log(result);
+                res.status(200).json({
+                    message: 'User created'
+                })
             })
-        }, (error, results) => {
-            if (error) {
-                reject(error);
-            }
-            resolve(results);
-        });
-    });
-}
+                .catch(error => {
+                    console.log(error);
+                    res.status(500).json({ error: error })
+                })
 
-const readdir = (url) => {
-    return new Promise((resolve, reject) => {
-        fs.readdir(url, (error, resultArray) => {
-            if (error) {
-                reject(error);
-            }
-            resolve(resultArray);
-        })
+        }
     })
-}
-
-const construct = (param) => {
-    return {
-        filename: path.basename(param.file),
-        size: parseSize(param.metadata.size),
-        filetype: mime.getType(param.file),
-    }
-}
-
-const parseSize = (size) => {
-    const filesize = Math.round(size / 1000);
-    if (Math.round(filesize) < 1) {
-        return '1 Kilobyte';
-    } else if (filesize < 1000) {
-        return filesize.toString().concat(' Kilobytes')
-    } else if (filesize >= 1000 && filesize <= 1000000) {
-        return Math.round(filesize / 1000).toString().concat(' Megabytes');
-    } else if (filesize > 1000000 && filesize <= 1000000000) {
-        return (filesize / 1000000).toPrecision(3).concat(' Gigabytes');
-    }
-}
+});

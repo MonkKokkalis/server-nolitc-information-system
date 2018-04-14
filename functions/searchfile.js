@@ -21,12 +21,26 @@ const searchFile = (url, filename) => {
                 reduce({url: url, array: filteredArray}).then(result => callback(null, result));
             },
             function(reducedArray, callback) {
-                stat(reducedArray).then(result => callback(null, result));
+                search(reducedArray, filename).then(result => callback(null, result));
+            },
+            function(searchedArray, callback) {
+                stat(searchedArray).then(result => callback(null, result));
             },
             function(statArray, callback) {
                 group(statArray).then(result => callback(null, result));
             }
         ], (error, result) => resolve(result));
+    })
+}
+
+const search = (reducedArray, filename) => {
+    return new Promise((resolve) => {
+        async.filter(reducedArray, function(element, callback) {
+            callback(null, path.basename(element).toLowerCase()
+                .match(new RegExp(filename)) ? true : false);
+        }, (error, result) => {
+            resolve(result);
+        })
     })
 }
 
@@ -104,7 +118,7 @@ const filter = (param) => {
 }
 
 const reduce = (param) => {
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
         async.reduce(param.array, [], function(accumulator, current, callback) {
             readdir(path.join(param.url, current))
                 .then(resultArray => 

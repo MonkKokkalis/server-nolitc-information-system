@@ -8,7 +8,11 @@ const downloadRoute = require('./api/routes/download');
 const filesRoute = require('./api/routes/files');
 const searchFileRoute = require('./api/routes/searchFile');
 const uploadRoute = require('./api/routes/upload');
+const userRoute = require('./api/routes/user');
 const serverLog = fs.createWriteStream(path.join(__dirname, 'access.log'), {flags: 'a'});
+const mongoose = require('mongoose');
+mongoose.connect('mongodb://localhost:27017/Information-System')
+    .then(() => {console.log('connected to the database')}, (error)=>{console.log(error)});
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: false}));
 app.use((req, res, next) => {
@@ -27,4 +31,5 @@ app.use('/api/files/download', downloadRoute);
 app.use('/api/files/get', filesRoute);
 app.use('/api/files/upload', uploadRoute);
 app.use('/api/files/searchFile', searchFileRoute);
+app.use('/api/user', userRoute);
 module.exports = app;
