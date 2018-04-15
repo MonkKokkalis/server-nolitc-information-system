@@ -14,7 +14,7 @@ router.post('/signin', (req, res) => {
             })
         }
         bcryptjs.compare(req.body.password, user[0].password, (error, result) => {
-            if(!error) {
+            if(!result) {
                 return res.status(400).json({
                     message: 'Authentication failed'
                 })
@@ -28,6 +28,7 @@ router.post('/signin', (req, res) => {
                 })
                 return res.status(201).json({
                     message: 'Authentication Successful',
+                    user: {username: user[0].username, type: user[0].type},
                     token: token
                 })
             }
