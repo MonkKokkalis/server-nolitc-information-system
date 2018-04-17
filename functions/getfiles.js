@@ -23,16 +23,33 @@ const getAllFiles = (url) => {
             function (reducedArray, callback) {
                 stat(reducedArray).then(result => callback(null, result));
             },
-            function (statArray, callback) {
-                group(statArray).then(result => callback(null, result));
+            function(statArray, callback) {
+                sort(statArray).then(result => callback(null, result));
+            },
+            function (sortedArray, callback) {
+                group(sortedArray).then(result => callback(null, result));
             }
         ], (error, result) => resolve(result));
     })
 }
 
+const sort = (statArray) => {
+    return new Promise((resolve) => {
+        async.sortBy(statArray, function(element, callback){
+            callback(null, element.filename.toLowerCase());
+        }, (error, result) => {
+            resolve(result);
+        })
+    })
+}
+
 const group = (mappedArray) => {
     return new Promise((resolve) => {
-        async.times(Math.trunc(mappedArray.length / 5) + 1, function (index, next) {
+        let iterations = Math.trunc(mappedArray.length / 5);
+        if((mappedArray.length % 5) > 0) {
+            iterations += 1;
+        }
+        async.times(iterations, function (index, next) {
             next(null, mappedArray.slice(index * 5, (index + 1) * 5))
         }, function (error, result) {
             resolve(result);
