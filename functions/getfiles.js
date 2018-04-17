@@ -4,7 +4,9 @@ const async = require('async');
 const mime = require('mime/lite');
 mime.define({
     'application/micrsoft-word-file': ['docx'],
-    'application/microsoft-excel-file': ['xlsx']
+    'application/microsoft-excel-file': ['xlsx'],
+    'audio/mp3': ['mp3'],
+    'image/psd': ['psd']
 }, true);
 
 const getAllFiles = (url) => {
@@ -70,6 +72,7 @@ const stat = (array) => {
 }
 
 const construct = (param) => {
+    console.log(mime.getType(param.file));
     return {
         filename: path.basename(param.file),
         size: parseSize(param.metadata.size),

@@ -4,16 +4,23 @@ const multer = require('multer');
 const path = require('path');
 const rootPath = path.join(path.parse(__dirname).root, 'files');
 const mime = require('mime/lite');
+const checkDirectory = require('../../functions/checkdirectory');
 mime.define({
+    'microsoft powerpoint file': ['ppt', 'pptx'],
     'microsoft word file': ['doc', 'docx'],
-    'microsoft excel file': ['xlsx'],
-    'installer/application': ['exe']
+    'microsoft excel file': ['xls', 'xlsx'],
+    'installer/application': ['exe'],
+    'pdf/application': ['pdf']
 }, true);
 const storage = multer.diskStorage({
     destination: function(req, file, callback) {
         const directory = ((mime.getType(file.originalname)).split('/')[0]).concat('s');
-        console.log(mime.getType(file.originalname));
-        callback(null, path.join(rootPath, req.params.user, directory));
+        checkDirectory(path.join(rootPath, req.params.user), directory)
+        .then(result => {
+            console.log(result);
+            callback(null, path.join(rootPath, req.params.user, directory));
+        });
+        // callback(null, path.join(rootPath, req.params.user, directory));
     },
     filename: function(req, file, callback) {
         callback(null, file.originalname);
