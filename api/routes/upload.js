@@ -9,18 +9,17 @@ mime.define({
     'microsoft powerpoint file': ['ppt', 'pptx'],
     'microsoft word file': ['doc', 'docx'],
     'microsoft excel file': ['xls', 'xlsx'],
-    'installer/application': ['exe'],
-    'pdf/application': ['pdf']
+    'application/installer': ['exe'],
+    'application/pdf': ['pdf'],
+    'image/psd': ['psd']
 }, true);
 const storage = multer.diskStorage({
     destination: function(req, file, callback) {
         const directory = ((mime.getType(file.originalname)).split('/')[0]).concat('s');
         checkDirectory(path.join(rootPath, req.params.user), directory)
-        .then(result => {
-            console.log(result);
+        .then(() => {
             callback(null, path.join(rootPath, req.params.user, directory));
         });
-        // callback(null, path.join(rootPath, req.params.user, directory));
     },
     filename: function(req, file, callback) {
         callback(null, file.originalname);

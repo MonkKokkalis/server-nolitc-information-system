@@ -18,10 +18,10 @@ router.post('/signup', (req, res) => {
                     message: 'User created'
                 })
             })
-                .catch(error => {
-                    console.log(error);
-                    res.status(500).json({ error: error })
-                })
+            .catch(error => {
+                console.log(error);
+                res.status(500).json({ error: error })
+            })
 
         }
     })
