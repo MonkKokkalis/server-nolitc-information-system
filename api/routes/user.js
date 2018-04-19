@@ -4,6 +4,7 @@ const router = express.Router();
 const bcryptjs = require('bcryptjs');
 const User = require('../../prototypes/user');
 const jwt = require('jsonwebtoken');
+const createDirectory = require('../../functions/createdirectory');
 
 router.post('/signin', (req, res) => {
     User.findOne({username: req.body.username}, (error, user) => {
@@ -36,7 +37,9 @@ router.post('/signin', (req, res) => {
 router.post('/signup', (req, res) => {
     Promise.all([
         User.findOne({ username: req.body.username })
-            .then(result => {if(result){return reject('username')}}),
+            .then(result => {
+                if(result){return reject('username')}
+            }),
         User.findOne().and([
             { firstname: req.body.firstname }, 
             { lastname: req.body.lastname }
@@ -52,16 +55,19 @@ router.post('/signup', (req, res) => {
                 } else {
                     const user = new User({
                         _id: new mongoose.Types.ObjectId(),
-                        username: req.body.username,
+                        username: req.body.username.toLowerCase(),
                         password: hash,
                         type: req.body.type,
-                        firstname: req.body.firstname,
-                        lastname: req.body.lastname
+                        firstname: req.body.firstname.toLowerCase(),
+                        lastname: req.body.lastname.toLowerCase()
                     })
                     user.save().then(() => {
-                        res.status(200).json({
-                            message: 'User created'
-                        })
+                        createDirectory({firstname: user.firstname, lastname: user.lastname})
+                            .then(() => {
+                                res.status(200).json({
+                                    message: 'User created'
+                                })
+                            })
                     })
                     .catch(error => {
                         console.log(error);
