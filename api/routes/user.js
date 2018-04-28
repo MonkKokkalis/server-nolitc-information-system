@@ -8,7 +8,7 @@ const createDirectory = require('../../functions/createdirectory');
 
 router.post('/signin', (req, res) => {
     User.findOne({username: req.body.username}, (error, user) => {
-        if(error) {
+        if(!user) {
             return res.status(400).json({
                 message: 'User not found'
             })

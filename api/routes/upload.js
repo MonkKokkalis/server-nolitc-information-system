@@ -25,10 +25,23 @@ const storage = multer.diskStorage({
         callback(null, file.originalname);
     }
 })
-const upload = multer({storage: storage});
-router.post('/:user', upload.array('files'), (req, res) => {
-    res.status(200).json({
-        files: req.files.length
+const upload = multer({storage: storage}).array('files');
+// router.post('/:user', upload.array('files'), (req, res) => {
+//     res.status(200).json({
+//         files: req.files.length
+//     })
+// })
+
+router.post('/:user', (req, res) => {
+    upload(req, res, function(error){
+        if(error) {
+            return res.status(500).json({
+                message: error
+            })
+        }
+        res.status(200).json({
+            files: req.files.length
+        })
     })
 })
 

@@ -37,11 +37,11 @@ const createSubDirectory = (dir) => {
             },
             function (callback) {
                 fs.mkdir(path.join(dir, 'public'),
-                    () => callback(null, 'public folder created'))
+                () => callback(null, 'public folder created'))
             },
             function (callback) {
                 fs.mkdir(path.join(dir, 'protected'),
-                    () => callback(null, 'protected folder created'))
+                () => callback(null, 'protected folder created'))
             }
         ], (error, result) => {
             if(error) {
